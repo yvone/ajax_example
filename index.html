@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>JSON and AJAX</title>
+	<link rel="stylesheet" type="text/css" href="css/styles.css">
+	<script type="text/javascript">
+		function loadData() {
+			// crear una petición
+			let xhr = new XMLHttpRequest();
+			let btn = document.getElementById("btn");
+
+			xhr.onreadystatechange = function() {
+				console.log(this.readyState, this.status, this.statusText);
+			}
+
+			xhr.open("GET", "https://yvone.github.io/DAW/info-1.json");
+
+			// procesar la petición
+			xhr.onload = function() {
+				if(this.readyState === 4 && this.status === 200) {
+					// la información llego!! en = this
+
+					// cambiar texto
+					changeText(this);
+
+					// ocultar el boton
+					btn.classList.add("bye-bye");
+
+				} else {
+					// la información no llegó :C
+
+					alert("ERROR: " + this.status);
+				}
+			};
+
+			xhr.onerror = function() {
+				// no se logró ni la petición
+
+				alert("la conexión ha fallado");
+			}
+
+			// enviar la petición
+			xhr.send();
+		}
+
+		function createData(newData) {
+			// crear una petición
+			let xhr = new XMLHttpRequest();
+			
+			// xhr.withCredentials = true;
+			xhr.open("POST", "http://localhost:3000/kittens");
+
+			// xhr.setRequestHeader("cookie", "_kittens_api_session=coooookieeee");
+			xhr.setRequestHeader("content-type", "application/json");
+
+			// procesar la petición
+			xhr.onload = function () {
+				if(this.readyState === 4 && this.status === 201) {
+					// Los cambios han sido publicados
+
+					// mostrar una alerta con el response
+					alert(this.responseText);
+				} else {
+					// la información no fue publicada
+
+					alert("ERROR: " + this.status);
+				}
+			};
+
+			xhr.onerror = function() {
+				// no se logró realizar la petición
+
+				alert("la conexión ha fallado");
+			}
+
+			// enviar la petición
+			let name = document.getElementById('name').value;
+			let cuteness = document.getElementById('cuteness').value;
+			let color = document.getElementById('color').value;
+			let owner = document.getElementById('owner').value;
+			let explodes = document.getElementById('explodes').checked;
+
+			let obj = { name, cuteness, color, owner, explodes };
+
+			// let data = JSON.stringify({
+			// 	"name": "Ejemplo",
+			// 	"cuteness": 10,
+			// 	"color": "rosa",
+			// 	"owner": "Yvone",
+			// 	"explodes": true
+			// });
+			let data = JSON.stringify(obj);
+			console.log(obj);
+			console.log(data);
+
+			xhr.send(data);
+		}
+
+		function changeText(response) {
+			// modificar contenido
+			let loadedInfo = document.getElementById("loaded-info");
+			let htmlString = "";
+			
+			// modificar contenido
+			let data = JSON.parse(response.responseText);
+			data.forEach(function(persona) {
+				htmlString += '<p>' + persona.apellido + ' ' + persona.nombre + ' nació el ' + persona.fechaNac;
+
+				htmlString += ' y le gusta ' + persona.perfil.gustos.join(" y ");
+
+				htmlString += ' y no le gusta ' + persona.perfil.disgustos.join(" ni ");
+
+				htmlString += '.</p>'
+			});
+
+			loadedInfo.insertAdjacentHTML('beforeend', htmlString);
+		}
+	</script>
+</head>
+<body>
+	<header>
+		<h1>JSON and AJAX</h1>
+		<h3>Permitir que AJAX modique el contenido</h3>
+		<button id="btn" type="button" onclick="loadData()">mostrar información sin recargar la pantalla</button>
+	</header>
+
+	<form>
+		<p>Name</p>
+		<input type="text" id="name">
+		<p>Cuteness</p>
+		<input type="number" id="cuteness">
+		<p>Color</p>
+		<input type="text" id="color">
+		<p>Owner</p>
+		<input type="text" id="owner">
+		<input type="checkbox" id="explodes" checked> Explodes
+		<br>
+		<br>
+		<br>
+		
+		<button id="btn-create" type="button" onclick="createData()">crear un gatito</button>
+	</form> 
+
+	<div id="loaded-info"></div>
+	
+</body>
+</html>
